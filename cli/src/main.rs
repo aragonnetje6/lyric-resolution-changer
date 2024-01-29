@@ -1,3 +1,4 @@
+use chart_file_parser::chart::chart;
 use clap::Parser;
 use std::{io::Write, path::PathBuf};
 
@@ -24,7 +25,7 @@ fn main() {
     let cli = Cli::parse();
     let text = std::fs::read_to_string(cli.input_file).unwrap();
     let mut chart = chart(&text).unwrap().1;
-    chart.multiply_res(cli.multiplier);
+    chart.multiply(cli.multiplier);
     match cli.output_file {
         Some(file) => {
             let mut file = std::fs::File::create(file).unwrap();
