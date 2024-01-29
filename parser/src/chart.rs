@@ -9,7 +9,7 @@ use nom::{
 
 use crate::{
     global_event::{global_events, GlobalEvent},
-    song::song,
+    song::{song, Song},
     song_property::Property,
     sync_track::sync_track,
     sync_track_event::SyncTrackEvent,
@@ -18,7 +18,7 @@ use crate::{
 
 #[derive(Debug)]
 pub struct Chart<'a> {
-    song: Vec<Property<'a>>,
+    song: Song<'a>,
     synctrack: Vec<SyncTrackEvent>,
     global_events: Vec<GlobalEvent<'a>>,
     tracks: Vec<Track<'a>>,
@@ -26,7 +26,7 @@ pub struct Chart<'a> {
 
 impl<'a> Chart<'a> {
     pub fn new(
-        song: Vec<Property<'a>>,
+        song: Song<'a>,
         synctrack: Vec<SyncTrackEvent>,
         global_events: Vec<GlobalEvent<'a>>,
         tracks: Vec<Track<'a>>,
@@ -40,13 +40,7 @@ impl<'a> Chart<'a> {
     }
 
     pub fn multiply(&mut self, factor: u32) {
-        self.song
-            .iter_mut()
-            .find(|x| x.name == "Resolution")
-            .map(|x| {
-                x.value = (x.value.parse::<u32>().unwrap() * factor).to_string();
-            })
-            .unwrap();
+        self.song.multiply(factor);
         for item in &mut self.synctrack {
             item.multiply(factor);
         }
@@ -73,10 +67,7 @@ impl<'a> Display for Chart<'a> {
 {{
 {}}}
 {}",
-            self.song
-                .iter()
-                .map(Property::to_string)
-                .collect::<String>(),
+            self.song,
             self.synctrack
                 .iter()
                 .map(SyncTrackEvent::to_string)

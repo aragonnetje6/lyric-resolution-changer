@@ -1,6 +1,9 @@
+use std::fmt::Display;
+
 use nom::{
     bytes::complete::tag,
     character::complete::{multispace0, multispace1},
+    combinator::map_res,
     multi::separated_list1,
     sequence::{delimited, preceded},
     IResult,
@@ -8,14 +11,73 @@ use nom::{
 
 use crate::song_property::{property, Property};
 
-pub fn song(input: &str) -> IResult<&str, Vec<Property>> {
-    preceded(
-        preceded(tag("[Song]"), multispace0),
-        delimited(
-            preceded(tag("{"), multispace0),
-            separated_list1(multispace1, property),
-            preceded(multispace1, tag("}")),
+#[derive(Debug)]
+pub struct Song<'a> {
+    resolution: u32,
+    properties: Vec<Property<'a>>,
+}
+
+impl<'a> Song<'a> {
+    pub fn new(resolution: u32, properties: Vec<Property<'a>>) -> Self {
+        Self {
+            resolution,
+            properties,
+        }
+    }
+
+    pub fn multiply(&mut self, factor: u32) {
+        self.resolution *= factor;
+    }
+}
+
+impl<'a> TryFrom<Vec<Property<'a>>> for Song<'a> {
+    type Error = &'static str;
+
+    fn try_from(value: Vec<Property<'a>>) -> Result<Self, Self::Error> {
+        let resolution_entry = value
+            .iter()
+            .find(|x| x.name == "resolution")
+            .ok_or("resolution not found")?;
+        let resolution = resolution_entry
+            .value
+            .parse::<u32>()
+            .map_err(|_| "invalid resolution")?;
+        let properties = value
+            .into_iter()
+            .filter(|x| x.name != "resolution")
+            .collect();
+        Ok(Self {
+            resolution,
+            properties,
+        })
+    }
+}
+
+impl<'a> Display for Song<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}{}",
+            Property::new("resolution", self.resolution.to_string()),
+            self.properties
+                .iter()
+                .map(Property::to_string)
+                .collect::<String>()
+        )
+    }
+}
+
+pub fn song(input: &str) -> IResult<&str, Song> {
+    map_res(
+        preceded(
+            preceded(tag("[Song]"), multispace0),
+            delimited(
+                preceded(tag("{"), multispace0),
+                separated_list1(multispace1, property),
+                preceded(multispace1, tag("}")),
+            ),
         ),
+        Song::try_from,
     )(input)
 }
 
