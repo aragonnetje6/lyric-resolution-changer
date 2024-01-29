@@ -2,7 +2,7 @@
 name = "lyric-resolution-changer"
 version = "0.1.0"
 edition = "2021"
-desciption = "Clone Hero chart file resolution changing made easy!"
+description = "Clone Hero chart file resolution changing made easy!"
 license-file = "LICENSE.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
