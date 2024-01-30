@@ -32,7 +32,7 @@ fn main() {
             file.write_all(chart.to_string().as_bytes()).unwrap();
         }
         None => {
-            // println!("{chart}");
+            println!("{chart}");
         }
     }
 }
