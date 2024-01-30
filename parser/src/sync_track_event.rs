@@ -3,9 +3,10 @@ use std::fmt::Display;
 use nom::{
     branch::alt,
     bytes::complete::tag,
-    character::complete::{multispace1, space1},
+    character::complete::{multispace0, multispace1, space1},
     combinator::{map, opt},
-    sequence::{preceded, tuple},
+    multi::separated_list1,
+    sequence::{delimited, preceded, tuple},
     IResult,
 };
 
@@ -53,40 +54,51 @@ impl SyncTrackEvent {
             | SyncTrackEvent::Anchor { time, .. } => *time *= factor,
         }
     }
-}
 
-pub fn sync_track_event(input: &str) -> IResult<&str, SyncTrackEvent> {
-    let (input, time) = nom::character::complete::u32(input)?;
-    let (input, _) = tag(" = ")(input)?;
-    let (input, result) = alt((
-        map(
-            tuple((
-                tag("TS"),
-                preceded(multispace1, nom::character::complete::u32),
-                opt(preceded(space1, nom::character::complete::u32)),
-            )),
-            |(_, value1, value2)| SyncTrackEvent::TimeSignature {
-                time,
-                value1,
-                value2,
-            },
-        ),
-        map(
-            tuple((
-                tag("B"),
-                preceded(multispace1, nom::character::complete::u32),
-            )),
-            |(_, value)| SyncTrackEvent::Bpm { time, value },
-        ),
-        map(
-            tuple((
-                tag("A"),
-                preceded(multispace1, nom::character::complete::u32),
-            )),
-            |(_, value)| SyncTrackEvent::Anchor { time, value },
-        ),
-    ))(input)?;
-    Ok((input, result))
+    pub fn parse(input: &str) -> IResult<&str, SyncTrackEvent> {
+        let (input, time) = nom::character::complete::u32(input)?;
+        let (input, _) = tag(" = ")(input)?;
+        let (input, result) = alt((
+            map(
+                tuple((
+                    tag("TS"),
+                    preceded(multispace1, nom::character::complete::u32),
+                    opt(preceded(space1, nom::character::complete::u32)),
+                )),
+                |(_, value1, value2)| SyncTrackEvent::TimeSignature {
+                    time,
+                    value1,
+                    value2,
+                },
+            ),
+            map(
+                tuple((
+                    tag("B"),
+                    preceded(multispace1, nom::character::complete::u32),
+                )),
+                |(_, value)| SyncTrackEvent::Bpm { time, value },
+            ),
+            map(
+                tuple((
+                    tag("A"),
+                    preceded(multispace1, nom::character::complete::u32),
+                )),
+                |(_, value)| SyncTrackEvent::Anchor { time, value },
+            ),
+        ))(input)?;
+        Ok((input, result))
+    }
+
+    pub fn parse_section(input: &str) -> IResult<&str, Vec<SyncTrackEvent>> {
+        preceded(
+            preceded(tag("[SyncTrack]"), multispace0),
+            delimited(
+                preceded(tag("{"), multispace0),
+                separated_list1(multispace1, SyncTrackEvent::parse),
+                preceded(multispace0, tag("}")),
+            ),
+        )(input)
+    }
 }
 
 #[cfg(test)]
@@ -96,7 +108,27 @@ mod tests {
 
     #[test]
     fn test_sync_track_event() {
-        sync_track_event("0 = TS 6").unwrap();
-        sync_track_event("0 = B 152525").unwrap();
+        SyncTrackEvent::parse("0 = TS 6").unwrap();
+        SyncTrackEvent::parse("0 = B 152525").unwrap();
+    }
+
+    #[test]
+    fn test_sync_track() {
+        SyncTrackEvent::parse_section(
+            "[SyncTrack]
+{
+  0 = TS 6
+  0 = B 152525
+  1152 = TS 4
+  4224 = B 160187
+  10368 = B 160000
+  154752 = B 158662
+  156288 = B 180000
+  168576 = B 160000
+  173184 = B 160866
+  174720 = B 160000
+}",
+        )
+        .unwrap();
     }
 }

@@ -9,7 +9,7 @@ use nom::{
     IResult,
 };
 
-use crate::track_event::{track_event, TrackEvent};
+use crate::track_event::TrackEvent;
 
 #[derive(Debug)]
 pub struct Track<'a> {
@@ -27,6 +27,19 @@ impl<'a> Track<'a> {
             item.multiply(factor);
         }
     }
+    pub fn parse(input: &str) -> IResult<&str, Track> {
+        map(
+            tuple((
+                terminated(delimited(tag("["), alpha1, tag("]")), multispace0),
+                delimited(
+                    preceded(tag("{"), multispace0),
+                    separated_list1(multispace1, TrackEvent::parse),
+                    preceded(multispace0, tag("}")),
+                ),
+            )),
+            |(name, events)| Track::new(name, events),
+        )(input)
+    }
 }
 
 impl<'a> Display for Track<'a> {
@@ -43,20 +56,6 @@ impl<'a> Display for Track<'a> {
     }
 }
 
-pub fn track(input: &str) -> IResult<&str, Track> {
-    map(
-        tuple((
-            terminated(delimited(tag("["), alpha1, tag("]")), multispace0),
-            delimited(
-                preceded(tag("{"), multispace0),
-                separated_list1(multispace1, track_event),
-                preceded(multispace0, tag("}")),
-            ),
-        )),
-        |(name, events)| Track::new(name, events),
-    )(input)
-}
-
 #[cfg(test)]
 mod tests {
     #![allow(clippy::unwrap_used)]
@@ -64,6 +63,6 @@ mod tests {
 
     #[test]
     fn test_track() {
-        track(include_str!("test_data/test_track.txt")).unwrap();
+        Track::parse(include_str!("test_data/test_track.txt")).unwrap();
     }
 }

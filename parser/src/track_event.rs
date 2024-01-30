@@ -26,6 +26,48 @@ impl<'a> TrackEvent<'a> {
             TrackEvent::Special { time, .. } | TrackEvent::Event { time, .. } => *time *= factor,
         }
     }
+
+    pub fn parse(input: &str) -> IResult<&str, TrackEvent<'_>> {
+        let (input, time) = nom::character::complete::u32(input)?;
+        let (input, _) = tag(" = ")(input)?;
+        let (input, result) = alt((
+            map(
+                preceded(
+                    tag("N "),
+                    separated_pair(
+                        nom::character::complete::u32,
+                        multispace1,
+                        nom::character::complete::u32,
+                    ),
+                ),
+                |(fret, sustain)| TrackEvent::Note {
+                    time,
+                    fret,
+                    sustain,
+                },
+            ),
+            map(preceded(tag("E "), alpha1), |value| TrackEvent::Event {
+                time,
+                value,
+            }),
+            map(
+                preceded(
+                    tag("S "),
+                    separated_pair(
+                        nom::character::complete::u32,
+                        multispace1,
+                        nom::character::complete::u32,
+                    ),
+                ),
+                |(kind, content)| TrackEvent::Special {
+                    time,
+                    kind,
+                    content,
+                },
+            ),
+        ))(input)?;
+        Ok((input, result))
+    }
 }
 
 impl<'a> Display for TrackEvent<'a> {
@@ -46,48 +88,6 @@ impl<'a> Display for TrackEvent<'a> {
     }
 }
 
-pub fn track_event(input: &str) -> IResult<&str, TrackEvent<'_>> {
-    let (input, time) = nom::character::complete::u32(input)?;
-    let (input, _) = tag(" = ")(input)?;
-    let (input, result) = alt((
-        map(
-            preceded(
-                tag("N "),
-                separated_pair(
-                    nom::character::complete::u32,
-                    multispace1,
-                    nom::character::complete::u32,
-                ),
-            ),
-            |(fret, sustain)| TrackEvent::Note {
-                time,
-                fret,
-                sustain,
-            },
-        ),
-        map(preceded(tag("E "), alpha1), |value| TrackEvent::Event {
-            time,
-            value,
-        }),
-        map(
-            preceded(
-                tag("S "),
-                separated_pair(
-                    nom::character::complete::u32,
-                    multispace1,
-                    nom::character::complete::u32,
-                ),
-            ),
-            |(kind, content)| TrackEvent::Special {
-                time,
-                kind,
-                content,
-            },
-        ),
-    ))(input)?;
-    Ok((input, result))
-}
-
 #[cfg(test)]
 mod tests {
     #![allow(clippy::unwrap_used)]
@@ -95,6 +95,6 @@ mod tests {
 
     #[test]
     fn test_track_event() {
-        track_event("183936 = N 4 3072").unwrap();
+        TrackEvent::parse("183936 = N 4 3072").unwrap();
     }
 }

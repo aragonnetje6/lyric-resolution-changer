@@ -22,11 +22,11 @@ impl<'a> Property<'a> {
     pub fn new(name: &'a str, value: String) -> Self {
         Self { name, value }
     }
-}
 
-pub fn property(input: &str) -> IResult<&str, Property> {
-    let (input, name) = alphanumeric1(input)?;
-    let (input, _) = tag(" = ")(input)?;
-    let (input, value) = take_until1("\n")(input)?;
-    Ok((input, Property::new(name, value.to_string())))
+    pub fn parse(input: &str) -> IResult<&str, Property> {
+        let (input, name) = alphanumeric1(input)?;
+        let (input, _) = tag(" = ")(input)?;
+        let (input, value) = take_until1("\n")(input)?;
+        Ok((input, Property::new(name, value.to_string())))
+    }
 }

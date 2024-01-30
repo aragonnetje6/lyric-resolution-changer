@@ -29,6 +29,38 @@ impl<'a> GlobalEvent<'a> {
             | GlobalEvent::Other { time, .. } => *time *= factor,
         }
     }
+
+    pub fn parse(input: &str) -> IResult<&str, GlobalEvent> {
+        let (input, time) = nom::character::complete::u32(input)?;
+        let (input, _) = tag(" = E ")(input)?;
+        let (input, result) = delimited(
+            tag("\""),
+            alt((
+                map(tag("phrase_start"), |_| GlobalEvent::PhraseStart { time }),
+                map(tag("phrase_end"), |_| GlobalEvent::PhraseEnd { time }),
+                map(preceded(tag("section "), cut(take_until("\""))), |name| {
+                    GlobalEvent::Section { time, name }
+                }),
+                map(preceded(tag("lyric "), cut(take_until("\""))), |text| {
+                    GlobalEvent::Lyric { time, text }
+                }),
+                map(take_until("\""), |value| GlobalEvent::Other { time, value }),
+            )),
+            tag("\""),
+        )(input)?;
+        Ok((input, result))
+    }
+
+    pub fn parse_section(input: &str) -> IResult<&str, Vec<GlobalEvent>> {
+        preceded(
+            preceded(tag("[Events]"), multispace0),
+            delimited(
+                preceded(tag("{"), multispace0),
+                separated_list1(multispace1, GlobalEvent::parse),
+                preceded(multispace0, tag("}")),
+            ),
+        )(input)
+    }
 }
 
 impl<'a> Display for GlobalEvent<'a> {
@@ -43,38 +75,6 @@ impl<'a> Display for GlobalEvent<'a> {
     }
 }
 
-pub fn global_events(input: &str) -> IResult<&str, Vec<GlobalEvent>> {
-    preceded(
-        preceded(tag("[Events]"), multispace0),
-        delimited(
-            preceded(tag("{"), multispace0),
-            separated_list1(multispace1, global_event),
-            preceded(multispace0, tag("}")),
-        ),
-    )(input)
-}
-
-pub fn global_event(input: &str) -> IResult<&str, GlobalEvent> {
-    let (input, time) = nom::character::complete::u32(input)?;
-    let (input, _) = tag(" = E ")(input)?;
-    let (input, result) = delimited(
-        tag("\""),
-        alt((
-            map(tag("phrase_start"), |_| GlobalEvent::PhraseStart { time }),
-            map(tag("phrase_end"), |_| GlobalEvent::PhraseEnd { time }),
-            map(preceded(tag("section "), cut(take_until("\""))), |name| {
-                GlobalEvent::Section { time, name }
-            }),
-            map(preceded(tag("lyric "), cut(take_until("\""))), |text| {
-                GlobalEvent::Lyric { time, text }
-            }),
-            map(take_until("\""), |value| GlobalEvent::Other { time, value }),
-        )),
-        tag("\""),
-    )(input)?;
-    Ok((input, result))
-}
-
 #[cfg(test)]
 mod tests {
     #![allow(clippy::unwrap_used)]
@@ -82,14 +82,14 @@ mod tests {
 
     #[test]
     fn test_global_event() {
-        global_event("4224 = E \"section Intro\"").unwrap();
-        global_event("38496 = E \"phrase_start\"").unwrap();
-        global_event("38592 = E \"lyric I\"").unwrap();
-        global_event("40512 = E \"phrase_end\"").unwrap();
+        GlobalEvent::parse("4224 = E \"section Intro\"").unwrap();
+        GlobalEvent::parse("38496 = E \"phrase_start\"").unwrap();
+        GlobalEvent::parse("38592 = E \"lyric I\"").unwrap();
+        GlobalEvent::parse("40512 = E \"phrase_end\"").unwrap();
     }
 
     #[test]
     fn test_global_events() {
-        global_events(include_str!("test_data/test_events.txt")).unwrap();
+        GlobalEvent::parse_section(include_str!("test_data/test_events.txt")).unwrap();
     }
 }

@@ -9,7 +9,7 @@ use nom::{
     IResult,
 };
 
-use crate::song_property::{property, Property};
+use crate::song_property::Property;
 
 #[derive(Debug)]
 pub struct Song<'a> {
@@ -27,6 +27,20 @@ impl<'a> Song<'a> {
 
     pub fn multiply(&mut self, factor: u32) {
         self.resolution *= factor;
+    }
+
+    pub fn parse(input: &str) -> IResult<&str, Song> {
+        map_res(
+            preceded(
+                preceded(tag("[Song]"), multispace0),
+                delimited(
+                    preceded(tag("{"), multispace0),
+                    separated_list1(multispace1, Property::parse),
+                    preceded(multispace1, tag("}")),
+                ),
+            ),
+            Song::try_from,
+        )(input)
     }
 }
 
@@ -67,20 +81,6 @@ impl<'a> Display for Song<'a> {
     }
 }
 
-pub fn song(input: &str) -> IResult<&str, Song> {
-    map_res(
-        preceded(
-            preceded(tag("[Song]"), multispace0),
-            delimited(
-                preceded(tag("{"), multispace0),
-                separated_list1(multispace1, property),
-                preceded(multispace1, tag("}")),
-            ),
-        ),
-        Song::try_from,
-    )(input)
-}
-
 #[cfg(test)]
 mod tests {
     #![allow(clippy::unwrap_used)]
@@ -88,7 +88,7 @@ mod tests {
 
     #[test]
     fn test_song() {
-        song(
+        Song::parse(
             r#"[Song]
 {
   Name = "Second Sight"

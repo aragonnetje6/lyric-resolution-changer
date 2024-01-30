@@ -8,11 +8,7 @@ use nom::{
 };
 
 use crate::{
-    global_event::{global_events, GlobalEvent},
-    song::{song, Song},
-    sync_track::sync_track,
-    sync_track_event::SyncTrackEvent,
-    track::{track, Track},
+    global_event::GlobalEvent, song::Song, sync_track_event::SyncTrackEvent, track::Track,
 };
 
 #[derive(Debug)]
@@ -82,12 +78,12 @@ impl<'a> Display for Chart<'a> {
 
 pub fn chart(input: &str) -> IResult<&str, Chart> {
     let (input, _) = take_until("[")(input)?;
-    let (input, song) = song(input)?;
+    let (input, song) = Song::parse(input)?;
     let (input, _) = multispace0(input)?;
-    let (input, synctrack) = sync_track(input)?;
+    let (input, synctrack) = SyncTrackEvent::parse_section(input)?;
     let (input, _) = multispace0(input)?;
-    let (input, global_events) = global_events(input)?;
+    let (input, global_events) = GlobalEvent::parse_section(input)?;
     let (input, _) = multispace0(input)?;
-    let (input, tracks) = separated_list1(multispace1, track)(input)?;
+    let (input, tracks) = separated_list1(multispace1, Track::parse)(input)?;
     Ok((input, Chart::new(song, synctrack, global_events, tracks)))
 }
