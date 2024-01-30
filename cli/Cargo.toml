@@ -1,6 +1,6 @@
 [package]
 name = "lyric-resolution-changer-cli"
-version = "0.2.3"
+version = "0.2.4"
 authors = ["aragonnetje6"]
 edition = "2021"
 description = "Clone Hero chart file resolution changing made easy! cli version"
@@ -12,9 +12,9 @@ workspace = "../"
 
 [dependencies]
 clap = { version = "4.4.18", features = ["derive"] }
-dhat = "0.3.2"
 chart-file-parser = "0.2.1"
+dhat = { version = "0.3.2", optional = true }
 
 [features]
-dhat-heap = []
+dhat-heap = ["dep:dhat"]
 
