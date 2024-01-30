@@ -10,7 +10,6 @@ use nom::{
 use crate::{
     global_event::{global_events, GlobalEvent},
     song::{song, Song},
-    song_property::Property,
     sync_track::sync_track,
     sync_track_event::SyncTrackEvent,
     track::{track, Track},

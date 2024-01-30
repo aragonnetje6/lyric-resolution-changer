@@ -4,7 +4,7 @@ use nom::{
     branch::alt,
     bytes::complete::{tag, take_until},
     character::complete::{multispace0, multispace1},
-    combinator::map,
+    combinator::{cut, map},
     multi::separated_list1,
     sequence::{delimited, preceded},
     IResult,
@@ -16,6 +16,7 @@ pub enum GlobalEvent<'a> {
     PhraseEnd { time: u32 },
     Section { time: u32, name: &'a str },
     Lyric { time: u32, text: &'a str },
+    Other { time: u32, value: &'a str },
 }
 
 impl<'a> GlobalEvent<'a> {
@@ -24,7 +25,8 @@ impl<'a> GlobalEvent<'a> {
             GlobalEvent::PhraseStart { time }
             | GlobalEvent::PhraseEnd { time }
             | GlobalEvent::Section { time, .. }
-            | GlobalEvent::Lyric { time, .. } => *time *= factor,
+            | GlobalEvent::Lyric { time, .. }
+            | GlobalEvent::Other { time, .. } => *time *= factor,
         }
     }
 }
@@ -36,6 +38,7 @@ impl<'a> Display for GlobalEvent<'a> {
             GlobalEvent::PhraseEnd { time } => writeln!(f, "  {time} = E \"phrase_end\""),
             GlobalEvent::Section { time, name } => writeln!(f, "  {time} = E \"section {name}\""),
             GlobalEvent::Lyric { time, text } => writeln!(f, "  {time} = E \"lyric {text}\""),
+            GlobalEvent::Other { time, value } => write!(f, "  {time} = E \"{value}\""),
         }
     }
 }
@@ -59,12 +62,13 @@ pub fn global_event(input: &str) -> IResult<&str, GlobalEvent> {
         alt((
             map(tag("phrase_start"), |_| GlobalEvent::PhraseStart { time }),
             map(tag("phrase_end"), |_| GlobalEvent::PhraseEnd { time }),
-            map(preceded(tag("section "), take_until("\"")), |name| {
+            map(preceded(tag("section "), cut(take_until("\""))), |name| {
                 GlobalEvent::Section { time, name }
             }),
-            map(preceded(tag("lyric "), take_until("\"")), |text| {
+            map(preceded(tag("lyric "), cut(take_until("\""))), |text| {
                 GlobalEvent::Lyric { time, text }
             }),
+            map(take_until("\""), |value| GlobalEvent::Other { time, value }),
         )),
         tag("\""),
     )(input)?;

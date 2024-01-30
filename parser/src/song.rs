@@ -36,7 +36,7 @@ impl<'a> TryFrom<Vec<Property<'a>>> for Song<'a> {
     fn try_from(value: Vec<Property<'a>>) -> Result<Self, Self::Error> {
         let resolution_entry = value
             .iter()
-            .find(|x| x.name == "resolution")
+            .find(|x| x.name == "Resolution")
             .ok_or("resolution not found")?;
         let resolution = resolution_entry
             .value
@@ -44,7 +44,7 @@ impl<'a> TryFrom<Vec<Property<'a>>> for Song<'a> {
             .map_err(|_| "invalid resolution")?;
         let properties = value
             .into_iter()
-            .filter(|x| x.name != "resolution")
+            .filter(|x| x.name != "Resolution")
             .collect();
         Ok(Self {
             resolution,
