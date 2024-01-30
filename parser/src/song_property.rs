@@ -1,8 +1,8 @@
 use std::fmt::Display;
 
 use nom::{
-    bytes::complete::{tag, take_until1},
-    character::complete::alphanumeric1,
+    bytes::complete::tag,
+    character::complete::{alphanumeric1, not_line_ending},
     IResult,
 };
 
@@ -26,7 +26,7 @@ impl<'a> Property<'a> {
     pub fn parse(input: &str) -> IResult<&str, Property> {
         let (input, name) = alphanumeric1(input)?;
         let (input, _) = tag(" = ")(input)?;
-        let (input, value) = take_until1("\n")(input)?;
+        let (input, value) = not_line_ending(input)?;
         Ok((input, Property::new(name, value.to_string())))
     }
 }

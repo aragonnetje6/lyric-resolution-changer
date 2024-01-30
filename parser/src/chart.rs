@@ -46,6 +46,18 @@ impl<'a> Chart<'a> {
             item.multiply(factor);
         }
     }
+
+    pub fn parse(input: &str) -> IResult<&str, Chart> {
+        let (input, _) = take_until("[")(input)?;
+        let (input, song) = Song::parse(input)?;
+        let (input, _) = multispace0(input)?;
+        let (input, synctrack) = SyncTrackEvent::parse_section(input)?;
+        let (input, _) = multispace0(input)?;
+        let (input, global_events) = GlobalEvent::parse_section(input)?;
+        let (input, _) = multispace0(input)?;
+        let (input, tracks) = separated_list1(multispace1, Track::parse)(input)?;
+        Ok((input, Chart::new(song, synctrack, global_events, tracks)))
+    }
 }
 
 impl<'a> Display for Chart<'a> {
@@ -74,16 +86,4 @@ impl<'a> Display for Chart<'a> {
             self.tracks.iter().map(Track::to_string).collect::<String>()
         )
     }
-}
-
-pub fn chart(input: &str) -> IResult<&str, Chart> {
-    let (input, _) = take_until("[")(input)?;
-    let (input, song) = Song::parse(input)?;
-    let (input, _) = multispace0(input)?;
-    let (input, synctrack) = SyncTrackEvent::parse_section(input)?;
-    let (input, _) = multispace0(input)?;
-    let (input, global_events) = GlobalEvent::parse_section(input)?;
-    let (input, _) = multispace0(input)?;
-    let (input, tracks) = separated_list1(multispace1, Track::parse)(input)?;
-    Ok((input, Chart::new(song, synctrack, global_events, tracks)))
 }

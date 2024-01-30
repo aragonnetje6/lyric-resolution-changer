@@ -1,5 +1,5 @@
 #![allow(clippy::unwrap_used)]
-use chart_file_parser::chart::chart;
+use chart_file_parser::chart::Chart;
 
 #[test]
 fn s_hero_individual() {
@@ -10,6 +10,6 @@ fn s_hero_individual() {
         let input = std::fs::read_to_string(path).unwrap();
         let name = entry.file_name().to_str().unwrap().to_string();
         println!("{name}");
-        chart(&input).map_err(|_| &name).expect(&name);
+        Chart::parse(&input).map_err(|_| &name).expect(&name);
     }
 }
