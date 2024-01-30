@@ -1,9 +1,12 @@
 [package]
 name = "chart-file-parser"
-version = "0.2.0"
+version = "0.2.1"
+authors = ["aragonnetje6"]
 edition = "2021"
 description = "Parser for .chart files"
+repository = "https://github.com/aragonnetje6/lyric-resolution-changer"
 license-file = "LICENSE.md"
+workspace = "../"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
