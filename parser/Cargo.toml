@@ -1,6 +1,6 @@
 [package]
 name = "chart-file-parser"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["aragonnetje6"]
 edition = "2021"
 description = "Parser for .chart files"
