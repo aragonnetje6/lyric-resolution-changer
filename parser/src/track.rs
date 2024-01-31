@@ -19,16 +19,16 @@ pub struct Track<'a> {
 
 impl<'a> Track<'a> {
     #[must_use]
-    pub fn new(name: &'a str, events: Vec<TrackEvent<'a>>) -> Self {
+    pub(crate) fn new(name: &'a str, events: Vec<TrackEvent<'a>>) -> Self {
         Self { name, events }
     }
 
-    pub fn multiply(&mut self, factor: u32) {
+    pub(crate) fn multiply(&mut self, factor: u32) {
         for item in &mut self.events {
             item.multiply(factor);
         }
     }
-    pub fn parse(input: &str) -> IResult<&str, Track> {
+    pub(crate) fn parse(input: &str) -> IResult<&str, Track> {
         map(
             tuple((
                 terminated(delimited(tag("["), alpha1, tag("]")), multispace0),

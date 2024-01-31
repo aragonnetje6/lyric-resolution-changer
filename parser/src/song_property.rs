@@ -9,9 +9,9 @@ use nom::{
 };
 
 #[derive(Debug)]
-pub struct SongProperty<'a> {
-    pub name: &'a str,
-    pub value: &'a str,
+pub(crate) struct SongProperty<'a> {
+    name: &'a str,
+    value: &'a str,
 }
 
 impl<'a> Display for SongProperty<'a> {
@@ -22,14 +22,22 @@ impl<'a> Display for SongProperty<'a> {
 
 impl<'a> SongProperty<'a> {
     #[must_use]
-    pub fn new(name: &'a str, value: &'a str) -> Self {
+    pub(crate) fn new(name: &'a str, value: &'a str) -> Self {
         Self { name, value }
     }
 
-    pub fn parse(input: &str) -> IResult<&str, SongProperty> {
+    pub(crate) fn parse(input: &str) -> IResult<&str, SongProperty> {
         map(
             separated_pair(alphanumeric1, tag(" = "), not_line_ending),
             |(name, value)| SongProperty::new(name, value),
         )(input)
+    }
+
+    pub(crate) fn name(&self) -> &'a str {
+        self.name
+    }
+
+    pub(crate) fn value(&self) -> &'a str {
+        self.value
     }
 }

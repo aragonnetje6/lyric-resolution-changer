@@ -12,25 +12,25 @@ use nom::{
 use crate::song_property::SongProperty;
 
 #[derive(Debug)]
-pub struct Song<'a> {
+pub(crate) struct Song<'a> {
     resolution: u32,
     properties: Vec<SongProperty<'a>>,
 }
 
 impl<'a> Song<'a> {
     #[must_use]
-    pub fn new(resolution: u32, properties: Vec<SongProperty<'a>>) -> Self {
+    pub(crate) fn new(resolution: u32, properties: Vec<SongProperty<'a>>) -> Self {
         Self {
             resolution,
             properties,
         }
     }
 
-    pub fn multiply(&mut self, factor: u32) {
+    pub(crate) fn multiply(&mut self, factor: u32) {
         self.resolution *= factor;
     }
 
-    pub fn parse(input: &str) -> IResult<&str, Song> {
+    pub(crate) fn parse(input: &str) -> IResult<&str, Song> {
         map_res(
             preceded(
                 preceded(tag("[Song]"), multispace0),
@@ -51,20 +51,17 @@ impl<'a> TryFrom<Vec<SongProperty<'a>>> for Song<'a> {
     fn try_from(value: Vec<SongProperty<'a>>) -> Result<Self, Self::Error> {
         let resolution_entry = value
             .iter()
-            .find(|x| x.name == "Resolution")
+            .find(|x| x.name() == "Resolution")
             .ok_or("resolution not found")?;
         let resolution = resolution_entry
-            .value
+            .value()
             .parse::<u32>()
             .map_err(|_| "invalid resolution")?;
         let properties = value
             .into_iter()
-            .filter(|x| x.name != "Resolution")
+            .filter(|x| x.name() != "Resolution")
             .collect();
-        Ok(Self {
-            resolution,
-            properties,
-        })
+        Ok(Self::new(resolution, properties))
     }
 }
 

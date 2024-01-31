@@ -22,7 +22,7 @@ pub struct Chart<'a> {
 
 impl<'a> Chart<'a> {
     #[must_use]
-    pub fn new(
+    pub(crate) fn new(
         song: Song<'a>,
         synctrack: Vec<SyncTrackEvent>,
         global_events: Vec<GlobalEvent<'a>>,

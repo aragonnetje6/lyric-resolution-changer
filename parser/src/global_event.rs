@@ -20,7 +20,7 @@ pub enum GlobalEvent<'a> {
 }
 
 impl<'a> GlobalEvent<'a> {
-    pub fn multiply(&mut self, factor: u32) {
+    pub(crate) fn multiply(&mut self, factor: u32) {
         match self {
             GlobalEvent::PhraseStart { time }
             | GlobalEvent::PhraseEnd { time }
@@ -30,7 +30,7 @@ impl<'a> GlobalEvent<'a> {
         }
     }
 
-    pub fn parse(input: &str) -> IResult<&str, GlobalEvent> {
+    fn parse(input: &str) -> IResult<&str, GlobalEvent> {
         let (input, time) = nom::character::complete::u32(input)?;
         let (input, _) = tag(" = E ")(input)?;
         let (input, result) = delimited(
@@ -51,7 +51,7 @@ impl<'a> GlobalEvent<'a> {
         Ok((input, result))
     }
 
-    pub fn parse_section(input: &str) -> IResult<&str, Vec<GlobalEvent>> {
+    pub(crate) fn parse_section(input: &str) -> IResult<&str, Vec<GlobalEvent>> {
         preceded(
             preceded(tag("[Events]"), multispace0),
             delimited(

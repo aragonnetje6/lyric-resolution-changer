@@ -17,7 +17,7 @@ pub enum TrackEvent<'a> {
 }
 
 impl<'a> TrackEvent<'a> {
-    pub fn multiply(&mut self, factor: u32) {
+    pub(crate) fn multiply(&mut self, factor: u32) {
         match self {
             TrackEvent::Note { time, sustain, .. } => {
                 *time *= factor;
@@ -27,7 +27,7 @@ impl<'a> TrackEvent<'a> {
         }
     }
 
-    pub fn parse(input: &str) -> IResult<&str, TrackEvent<'_>> {
+    pub(crate) fn parse(input: &str) -> IResult<&str, TrackEvent<'_>> {
         let (input, time) = nom::character::complete::u32(input)?;
         let (input, _) = tag(" = ")(input)?;
         let (input, result) = alt((

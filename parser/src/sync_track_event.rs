@@ -11,7 +11,7 @@ use nom::{
 };
 
 #[derive(Debug)]
-pub enum SyncTrackEvent {
+pub(crate) enum SyncTrackEvent {
     Bpm {
         time: u32,
         value: u32,
@@ -47,7 +47,7 @@ impl Display for SyncTrackEvent {
 }
 
 impl SyncTrackEvent {
-    pub fn multiply(&mut self, factor: u32) {
+    pub(crate) fn multiply(&mut self, factor: u32) {
         match self {
             SyncTrackEvent::Bpm { time, .. }
             | SyncTrackEvent::TimeSignature { time, .. }
@@ -55,7 +55,7 @@ impl SyncTrackEvent {
         }
     }
 
-    pub fn parse(input: &str) -> IResult<&str, SyncTrackEvent> {
+    fn parse(input: &str) -> IResult<&str, SyncTrackEvent> {
         let (input, time) = nom::character::complete::u32(input)?;
         let (input, _) = tag(" = ")(input)?;
         let (input, result) = alt((
@@ -89,7 +89,7 @@ impl SyncTrackEvent {
         Ok((input, result))
     }
 
-    pub fn parse_section(input: &str) -> IResult<&str, Vec<SyncTrackEvent>> {
+    pub(crate) fn parse_section(input: &str) -> IResult<&str, Vec<SyncTrackEvent>> {
         preceded(
             preceded(tag("[SyncTrack]"), multispace0),
             delimited(
