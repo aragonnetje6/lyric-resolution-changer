@@ -71,7 +71,7 @@ impl<'a> Display for Song<'a> {
         write!(
             f,
             "{}{}",
-            SongProperty::new("resolution", &resolution_string),
+            SongProperty::new("Resolution", &resolution_string),
             self.properties
                 .iter()
                 .map(SongProperty::to_string)
