@@ -1,6 +1,6 @@
 [package]
 name = "lyric-resolution-changer-cli"
-version = "0.2.6"
+version = "0.2.7"
 authors = ["aragonnetje6"]
 edition = "2021"
 description = "Clone Hero chart file resolution changing made easy! cli version"
