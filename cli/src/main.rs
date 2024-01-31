@@ -1,4 +1,4 @@
-use chart_file_parser::chart::chart;
+use chart_file_parser::chart::Chart;
 use clap::Parser;
 use std::{io::Write, path::PathBuf};
 
@@ -34,7 +34,7 @@ fn main() -> Result<(), Error> {
 
     let cli = Cli::parse();
     let text = std::fs::read_to_string(cli.input_file)?;
-    let mut chart = chart(&text)
+    let mut chart = Chart::parse(&text)
         .map_err(|err| Error::ParseError(err.to_string()))?
         .1;
     chart.multiply(cli.multiplier);
