@@ -36,6 +36,7 @@ impl<'a> Chart<'a> {
         }
     }
 
+    /// Multiply all timestamps and durations by the given factor.
     pub fn multiply(&mut self, factor: u32) {
         self.song.multiply(factor);
         for item in &mut self.synctrack {
@@ -49,6 +50,12 @@ impl<'a> Chart<'a> {
         }
     }
 
+    /// Parse the .chart
+    ///
+    /// # Errors
+    ///
+    /// This function will return an error if the given string does not
+    /// represent a valid .chart file.
     pub fn parse(input: &str) -> IResult<&str, Chart> {
         let (input, _) = take_until("[")(input)?;
         let (input, song) = Song::parse(input)?;
