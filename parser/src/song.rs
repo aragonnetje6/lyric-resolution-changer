@@ -9,16 +9,17 @@ use nom::{
     IResult,
 };
 
-use crate::song_property::Property;
+use crate::song_property::SongProperty;
 
 #[derive(Debug)]
 pub struct Song<'a> {
     resolution: u32,
-    properties: Vec<Property<'a>>,
+    properties: Vec<SongProperty<'a>>,
 }
 
 impl<'a> Song<'a> {
-    pub fn new(resolution: u32, properties: Vec<Property<'a>>) -> Self {
+    #[must_use]
+    pub fn new(resolution: u32, properties: Vec<SongProperty<'a>>) -> Self {
         Self {
             resolution,
             properties,
@@ -35,7 +36,7 @@ impl<'a> Song<'a> {
                 preceded(tag("[Song]"), multispace0),
                 delimited(
                     preceded(tag("{"), multispace0),
-                    separated_list1(multispace1, Property::parse),
+                    separated_list1(multispace1, SongProperty::parse),
                     preceded(multispace1, tag("}")),
                 ),
             ),
@@ -44,10 +45,10 @@ impl<'a> Song<'a> {
     }
 }
 
-impl<'a> TryFrom<Vec<Property<'a>>> for Song<'a> {
+impl<'a> TryFrom<Vec<SongProperty<'a>>> for Song<'a> {
     type Error = &'static str;
 
-    fn try_from(value: Vec<Property<'a>>) -> Result<Self, Self::Error> {
+    fn try_from(value: Vec<SongProperty<'a>>) -> Result<Self, Self::Error> {
         let resolution_entry = value
             .iter()
             .find(|x| x.name == "Resolution")
@@ -69,13 +70,14 @@ impl<'a> TryFrom<Vec<Property<'a>>> for Song<'a> {
 
 impl<'a> Display for Song<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let resolution_string = self.resolution.to_string();
         write!(
             f,
             "{}{}",
-            Property::new("resolution", self.resolution.to_string()),
+            SongProperty::new("resolution", &resolution_string),
             self.properties
                 .iter()
-                .map(Property::to_string)
+                .map(SongProperty::to_string)
                 .collect::<String>()
         )
     }

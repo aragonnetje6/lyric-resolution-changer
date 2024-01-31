@@ -19,20 +19,33 @@ struct Cli {
     multiplier: u32,
 }
 
-fn main() {
+#[derive(Debug, thiserror::Error)]
+enum Error {
+    #[error(transparent)]
+    IoError(#[from] std::io::Error),
+
+    #[error("Parsing failed")]
+    ParseError(String),
+}
+
+fn main() -> Result<(), Error> {
     #[cfg(feature = "dhat-heap")]
     let _profiler = dhat::Profiler::new_heap();
+
     let cli = Cli::parse();
-    let text = std::fs::read_to_string(cli.input_file).unwrap();
-    let mut chart = chart(&text).unwrap().1;
+    let text = std::fs::read_to_string(cli.input_file)?;
+    let mut chart = chart(&text)
+        .map_err(|err| Error::ParseError(err.to_string()))?
+        .1;
     chart.multiply(cli.multiplier);
     match cli.output_file {
         Some(file) => {
-            let mut file = std::fs::File::create(file).unwrap();
-            file.write_all(chart.to_string().as_bytes()).unwrap();
+            let mut file = std::fs::File::create(file)?;
+            file.write_all(chart.to_string().as_bytes())?;
         }
         None => {
             println!("{chart}");
         }
     }
+    Ok(())
 }

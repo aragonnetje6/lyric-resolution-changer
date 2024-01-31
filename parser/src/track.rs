@@ -18,6 +18,7 @@ pub struct Track<'a> {
 }
 
 impl<'a> Track<'a> {
+    #[must_use]
     pub fn new(name: &'a str, events: Vec<TrackEvent<'a>>) -> Self {
         Self { name, events }
     }
