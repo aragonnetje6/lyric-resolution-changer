@@ -8,14 +8,12 @@ use nom::{
     IResult,
 };
 
-use crate::{
-    global_event::GlobalEvent, song::Song, sync_track_event::SyncTrackEvent, track::Track,
-};
+use crate::{global_event::GlobalEvent, song::Song, sync_track::SyncTrack, track::Track};
 
 #[derive(Debug)]
 pub struct Chart<'a> {
     song: Song<'a>,
-    synctrack: Vec<SyncTrackEvent>,
+    synctrack: SyncTrack,
     global_events: Vec<GlobalEvent<'a>>,
     tracks: Vec<Track<'a>>,
 }
@@ -24,7 +22,7 @@ impl<'a> Chart<'a> {
     #[must_use]
     pub(crate) fn new(
         song: Song<'a>,
-        synctrack: Vec<SyncTrackEvent>,
+        synctrack: SyncTrack,
         global_events: Vec<GlobalEvent<'a>>,
         tracks: Vec<Track<'a>>,
     ) -> Self {
@@ -39,9 +37,7 @@ impl<'a> Chart<'a> {
     /// Multiply all timestamps and durations by the given factor.
     pub fn multiply(&mut self, factor: u32) {
         self.song.multiply(factor);
-        for item in &mut self.synctrack {
-            item.multiply(factor);
-        }
+        self.synctrack.multiply(factor);
         for item in &mut self.global_events {
             item.multiply(factor);
         }
@@ -60,7 +56,7 @@ impl<'a> Chart<'a> {
         let (input, _) = take_until("[")(input)?;
         let (input, song) = Song::parse(input)?;
         let (input, _) = multispace0(input)?;
-        let (input, synctrack) = SyncTrackEvent::parse_section(input)?;
+        let (input, synctrack) = SyncTrack::parse(input)?;
         let (input, _) = multispace0(input)?;
         let (input, global_events) = GlobalEvent::parse_section(input)?;
         let (input, _) = multispace0(input)?;
@@ -85,10 +81,7 @@ impl<'a> Display for Chart<'a> {
 {}}}
 {}",
             self.song,
-            self.synctrack
-                .iter()
-                .map(SyncTrackEvent::to_string)
-                .collect::<String>(),
+            self.synctrack,
             self.global_events
                 .iter()
                 .map(GlobalEvent::to_string)

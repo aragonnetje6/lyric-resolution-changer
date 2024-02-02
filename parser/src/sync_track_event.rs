@@ -3,10 +3,9 @@ use std::fmt::Display;
 use nom::{
     branch::alt,
     bytes::complete::tag,
-    character::complete::{multispace0, multispace1, space1},
+    character::complete::{multispace1, space1},
     combinator::{map, opt},
-    multi::separated_list1,
-    sequence::{delimited, preceded, tuple},
+    sequence::{preceded, tuple},
     IResult,
 };
 
@@ -55,7 +54,7 @@ impl SyncTrackEvent {
         }
     }
 
-    fn parse(input: &str) -> IResult<&str, SyncTrackEvent> {
+    pub(crate) fn parse(input: &str) -> IResult<&str, SyncTrackEvent> {
         let (input, time) = nom::character::complete::u32(input)?;
         let (input, _) = tag(" = ")(input)?;
         let (input, result) = alt((
@@ -88,17 +87,6 @@ impl SyncTrackEvent {
         ))(input)?;
         Ok((input, result))
     }
-
-    pub(crate) fn parse_section(input: &str) -> IResult<&str, Vec<SyncTrackEvent>> {
-        preceded(
-            preceded(tag("[SyncTrack]"), multispace0),
-            delimited(
-                preceded(tag("{"), multispace0),
-                separated_list1(multispace1, SyncTrackEvent::parse),
-                preceded(multispace0, tag("}")),
-            ),
-        )(input)
-    }
 }
 
 #[cfg(test)]
@@ -110,25 +98,5 @@ mod tests {
     fn test_sync_track_event() {
         SyncTrackEvent::parse("0 = TS 6").unwrap();
         SyncTrackEvent::parse("0 = B 152525").unwrap();
-    }
-
-    #[test]
-    fn test_sync_track() {
-        SyncTrackEvent::parse_section(
-            "[SyncTrack]
-{
-  0 = TS 6
-  0 = B 152525
-  1152 = TS 4
-  4224 = B 160187
-  10368 = B 160000
-  154752 = B 158662
-  156288 = B 180000
-  168576 = B 160000
-  173184 = B 160866
-  174720 = B 160000
-}",
-        )
-        .unwrap();
     }
 }
