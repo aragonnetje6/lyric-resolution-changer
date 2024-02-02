@@ -26,25 +26,6 @@ pub(crate) enum SyncTrackEvent {
     },
 }
 
-impl Display for SyncTrackEvent {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            SyncTrackEvent::Bpm { time, value } => writeln!(f, "  {time} = B {value}"),
-            SyncTrackEvent::TimeSignature {
-                time,
-                value1,
-                value2: Some(value2),
-            } => writeln!(f, "  {time} = TS {value1} {value2}"),
-            SyncTrackEvent::TimeSignature {
-                time,
-                value1,
-                value2: None,
-            } => writeln!(f, "  {time} = TS {value1}"),
-            SyncTrackEvent::Anchor { time, value } => writeln!(f, "  {time} = A {value}"),
-        }
-    }
-}
-
 impl SyncTrackEvent {
     pub(crate) fn multiply(&mut self, factor: u32) {
         match self {
@@ -54,6 +35,7 @@ impl SyncTrackEvent {
         }
     }
 
+    #[inline]
     pub(crate) fn parse(input: &str) -> IResult<&str, SyncTrackEvent> {
         let (input, time) = nom::character::complete::u32(input)?;
         let (input, _) = tag(" = ")(input)?;
@@ -86,6 +68,25 @@ impl SyncTrackEvent {
             ),
         ))(input)?;
         Ok((input, result))
+    }
+}
+
+impl Display for SyncTrackEvent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SyncTrackEvent::Bpm { time, value } => writeln!(f, "  {time} = B {value}"),
+            SyncTrackEvent::TimeSignature {
+                time,
+                value1,
+                value2: Some(value2),
+            } => writeln!(f, "  {time} = TS {value1} {value2}"),
+            SyncTrackEvent::TimeSignature {
+                time,
+                value1,
+                value2: None,
+            } => writeln!(f, "  {time} = TS {value1}"),
+            SyncTrackEvent::Anchor { time, value } => writeln!(f, "  {time} = A {value}"),
+        }
     }
 }
 

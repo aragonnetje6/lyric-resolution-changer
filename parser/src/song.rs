@@ -30,6 +30,7 @@ impl<'a> Song<'a> {
         self.resolution *= factor;
     }
 
+    #[inline]
     pub(crate) fn parse(input: &str) -> IResult<&str, Song> {
         map_res(
             preceded(

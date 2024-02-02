@@ -26,6 +26,7 @@ impl<'a> SongProperty<'a> {
         Self { name, value }
     }
 
+    #[inline]
     pub(crate) fn parse(input: &str) -> IResult<&str, SongProperty> {
         map(
             separated_pair(alphanumeric1, tag(" = "), not_line_ending),

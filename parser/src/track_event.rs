@@ -27,6 +27,7 @@ impl<'a> TrackEvent<'a> {
         }
     }
 
+    #[inline]
     pub(crate) fn parse(input: &str) -> IResult<&str, TrackEvent<'_>> {
         let (input, time) = nom::character::complete::u32(input)?;
         let (input, _) = tag(" = ")(input)?;

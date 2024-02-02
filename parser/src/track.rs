@@ -28,6 +28,8 @@ impl<'a> Track<'a> {
             item.multiply(factor);
         }
     }
+
+    #[inline]
     pub(crate) fn parse(input: &str) -> IResult<&str, Track> {
         map(
             tuple((

@@ -21,6 +21,7 @@ impl SyncTrack {
         Self { events }
     }
 
+    #[inline]
     pub(crate) fn parse(input: &str) -> IResult<&str, Self> {
         map(
             preceded(
