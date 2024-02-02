@@ -1,15 +1,11 @@
 use std::fmt::Display;
 
-use nom::{
-    bytes::complete::tag,
-    character::complete::{multispace0, multispace1},
-    combinator::map_res,
-    multi::separated_list1,
-    sequence::{delimited, preceded},
-    IResult,
-};
+use nom::{bytes::complete::tag, combinator::map_res, multi::many1, sequence::preceded, IResult};
 
-use crate::song_property::SongProperty;
+use crate::{
+    components::{curlied, spaced},
+    song_property::SongProperty,
+};
 
 #[derive(Debug)]
 pub(crate) struct Song<'a> {
@@ -34,12 +30,8 @@ impl<'a> Song<'a> {
     pub(crate) fn parse(input: &str) -> IResult<&str, Song> {
         map_res(
             preceded(
-                preceded(tag("[Song]"), multispace0),
-                delimited(
-                    preceded(tag("{"), multispace0),
-                    separated_list1(multispace1, SongProperty::parse),
-                    preceded(multispace1, tag("}")),
-                ),
+                spaced(tag("[Song]")),
+                curlied(many1(spaced(SongProperty::parse))),
             ),
             Song::try_from,
         )(input)

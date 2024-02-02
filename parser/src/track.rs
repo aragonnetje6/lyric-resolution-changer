@@ -1,15 +1,17 @@
 use std::fmt::Display;
 
 use nom::{
-    bytes::complete::tag,
-    character::complete::{alpha1, multispace0, multispace1},
+    character::complete::{alpha1, multispace1},
     combinator::map,
     multi::separated_list1,
-    sequence::{delimited, preceded, terminated, tuple},
+    sequence::tuple,
     IResult,
 };
 
-use crate::track_event::TrackEvent;
+use crate::{
+    components::{curlied, spaced, squared},
+    track_event::TrackEvent,
+};
 
 #[derive(Debug)]
 pub struct Track<'a> {
@@ -33,12 +35,8 @@ impl<'a> Track<'a> {
     pub(crate) fn parse(input: &str) -> IResult<&str, Track> {
         map(
             tuple((
-                terminated(delimited(tag("["), alpha1, tag("]")), multispace0),
-                delimited(
-                    preceded(tag("{"), multispace0),
-                    separated_list1(multispace1, TrackEvent::parse),
-                    preceded(multispace0, tag("}")),
-                ),
+                spaced(squared(alpha1)),
+                curlied(spaced(separated_list1(multispace1, TrackEvent::parse))),
             )),
             |(name, events)| Track::new(name, events),
         )(input)

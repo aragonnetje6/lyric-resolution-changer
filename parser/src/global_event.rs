@@ -3,12 +3,13 @@ use std::fmt::Display;
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_until},
-    character::complete::{multispace0, multispace1},
     combinator::{cut, map},
-    multi::separated_list1,
+    multi::many1,
     sequence::{delimited, preceded},
     IResult,
 };
+
+use crate::components::{curlied, spaced};
 
 #[derive(Debug)]
 pub enum GlobalEvent<'a> {
@@ -30,6 +31,7 @@ impl<'a> GlobalEvent<'a> {
         }
     }
 
+    #[inline]
     fn parse(input: &str) -> IResult<&str, GlobalEvent> {
         let (input, time) = nom::character::complete::u32(input)?;
         let (input, _) = tag(" = E ")(input)?;
@@ -51,14 +53,11 @@ impl<'a> GlobalEvent<'a> {
         Ok((input, result))
     }
 
+    #[inline]
     pub(crate) fn parse_section(input: &str) -> IResult<&str, Vec<GlobalEvent>> {
         preceded(
-            preceded(tag("[Events]"), multispace0),
-            delimited(
-                preceded(tag("{"), multispace0),
-                separated_list1(multispace1, GlobalEvent::parse),
-                preceded(multispace0, tag("}")),
-            ),
+            spaced(tag("[Events]")),
+            curlied(many1(spaced(GlobalEvent::parse))),
         )(input)
     }
 }

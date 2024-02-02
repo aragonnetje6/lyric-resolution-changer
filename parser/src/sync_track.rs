@@ -1,15 +1,11 @@
 use std::fmt::Display;
 
-use nom::{
-    bytes::complete::tag,
-    character::complete::{multispace0, multispace1},
-    combinator::map,
-    multi::separated_list1,
-    sequence::{delimited, preceded},
-    IResult,
-};
+use nom::{bytes::complete::tag, combinator::map, multi::many1, sequence::preceded, IResult};
 
-use crate::sync_track_event::SyncTrackEvent;
+use crate::{
+    components::{curlied, spaced},
+    sync_track_event::SyncTrackEvent,
+};
 
 #[derive(Debug)]
 pub(crate) struct SyncTrack {
@@ -25,12 +21,8 @@ impl SyncTrack {
     pub(crate) fn parse(input: &str) -> IResult<&str, Self> {
         map(
             preceded(
-                preceded(tag("[SyncTrack]"), multispace0),
-                delimited(
-                    preceded(tag("{"), multispace0),
-                    separated_list1(multispace1, SyncTrackEvent::parse),
-                    preceded(multispace0, tag("}")),
-                ),
+                spaced(tag("[SyncTrack]")),
+                curlied(many1(spaced(SyncTrackEvent::parse))),
             ),
             Self::new,
         )(input)
