@@ -1,3 +1,5 @@
+#![forbid(unsafe_code)]
+
 use chart_file_parser::chart::Chart;
 use clap::Parser;
 use std::{io::Write, path::PathBuf};

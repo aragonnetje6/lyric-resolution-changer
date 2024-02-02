@@ -1,3 +1,5 @@
+#![forbid(unsafe_code)]
+
 pub mod chart;
 pub mod global_event;
 pub mod song;
