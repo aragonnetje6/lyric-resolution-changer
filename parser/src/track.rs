@@ -13,7 +13,7 @@ use crate::{
     track_event::TrackEvent,
 };
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Track<'a> {
     name: &'a str,
     events: Vec<TrackEvent<'a>>,

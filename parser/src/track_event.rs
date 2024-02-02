@@ -9,7 +9,7 @@ use nom::{
     IResult,
 };
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum TrackEvent<'a> {
     Note { time: u32, fret: u32, sustain: u32 },
     Special { time: u32, kind: u32, content: u32 },

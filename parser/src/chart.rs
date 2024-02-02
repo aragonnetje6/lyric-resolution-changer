@@ -10,7 +10,7 @@ use nom::{
 
 use crate::{global_event::GlobalEvent, song::Song, sync_track::SyncTrack, track::Track};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Chart<'a> {
     song: Song<'a>,
     synctrack: SyncTrack,

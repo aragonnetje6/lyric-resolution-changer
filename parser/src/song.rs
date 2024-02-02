@@ -7,7 +7,7 @@ use crate::{
     song_property::SongProperty,
 };
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub(crate) struct Song<'a> {
     resolution: u32,
     properties: Vec<SongProperty<'a>>,

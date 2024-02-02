@@ -7,7 +7,7 @@ use crate::{
     sync_track_event::SyncTrackEvent,
 };
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub(crate) struct SyncTrack {
     events: Vec<SyncTrackEvent>,
 }
@@ -37,7 +37,14 @@ impl SyncTrack {
 
 impl Display for SyncTrack {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.events.iter().map(SyncTrackEvent::to_string).collect::<String>())
+        write!(
+            f,
+            "{}",
+            self.events
+                .iter()
+                .map(SyncTrackEvent::to_string)
+                .collect::<String>()
+        )
     }
 }
 

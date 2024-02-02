@@ -9,7 +9,7 @@ use nom::{
     IResult,
 };
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub(crate) enum SyncTrackEvent {
     Bpm {
         time: u32,

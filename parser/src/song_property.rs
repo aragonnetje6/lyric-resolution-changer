@@ -8,7 +8,7 @@ use nom::{
     IResult,
 };
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub(crate) struct SongProperty<'a> {
     name: &'a str,
     value: &'a str,

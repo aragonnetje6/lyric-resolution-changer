@@ -11,7 +11,7 @@ use nom::{
 
 use crate::components::{curlied, spaced};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum GlobalEvent<'a> {
     PhraseStart { time: u32 },
     PhraseEnd { time: u32 },
