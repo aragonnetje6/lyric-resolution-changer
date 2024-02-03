@@ -69,6 +69,22 @@ impl<'a> TrackEvent<'a> {
         ))(input)?;
         Ok((input, result))
     }
+
+    pub(crate) fn time(&self) -> u32 {
+        match self {
+            TrackEvent::Note { time, .. }
+            | TrackEvent::Special { time, .. }
+            | TrackEvent::Event { time, .. } => *time,
+        }
+    }
+
+    pub(crate) fn time_mut(&mut self) -> &mut u32 {
+        match self {
+            TrackEvent::Note { time, .. }
+            | TrackEvent::Special { time, .. }
+            | TrackEvent::Event { time, .. } => time,
+        }
+    }
 }
 
 impl<'a> Display for TrackEvent<'a> {

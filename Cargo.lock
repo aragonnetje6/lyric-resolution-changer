@@ -147,18 +147,18 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "chart-file-parser"
-version = "0.3.2"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "49cff87d597a88971c095294cf1a28c1159497855c8c4053969a903d9fa4e391"
 dependencies = [
- "criterion",
  "nom",
 ]
 
 [[package]]
 name = "chart-file-parser"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "026e5bb995d831b88e0a8a78a44bd09545bc5afe6754e9ee2a785423d509cad3"
+version = "0.4.0"
 dependencies = [
+ "criterion",
  "nom",
 ]
 
@@ -446,9 +446,9 @@ checksum = "b5e6163cb8c49088c2c36f57875e58ccd8c87c7427f7fbd50ea6710b2f3f2e8f"
 
 [[package]]
 name = "lyric-resolution-changer-cli"
-version = "0.2.8"
+version = "0.2.10"
 dependencies = [
- "chart-file-parser 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "chart-file-parser 0.3.3",
  "clap 4.4.18",
  "dhat",
  "thiserror",

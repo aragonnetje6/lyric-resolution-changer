@@ -1,28 +1,21 @@
 use std::fmt::Display;
 
-use nom::{
-    character::complete::{alpha1, multispace1},
-    combinator::map,
-    multi::separated_list1,
-    sequence::tuple,
-    IResult,
-};
+use nom::{bytes::complete::tag, combinator::map, multi::many1, sequence::preceded, IResult};
 
 use crate::{
-    components::{curlied, spaced, squared},
-    track_event::TrackEvent,
+    components::{curlied, spaced},
+    global_event::GlobalEvent,
 };
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct Track<'a> {
-    name: &'a str,
-    events: Vec<TrackEvent<'a>>,
+pub struct Events<'a> {
+    events: Vec<GlobalEvent<'a>>,
 }
 
-impl<'a> Track<'a> {
+impl<'a> Events<'a> {
     #[must_use]
-    pub(crate) fn new(name: &'a str, events: Vec<TrackEvent<'a>>) -> Self {
-        Self { name, events }
+    pub(crate) fn new(events: Vec<GlobalEvent<'a>>) -> Self {
+        Self { events }
     }
 
     pub(crate) fn multiply(&mut self, factor: u32) {
@@ -42,26 +35,25 @@ impl<'a> Track<'a> {
     }
 
     #[inline]
-    pub(crate) fn parse(input: &str) -> IResult<&str, Track> {
+    pub(crate) fn parse(input: &'a str) -> IResult<&str, Self> {
         map(
-            tuple((
-                spaced(squared(alpha1)),
-                curlied(spaced(separated_list1(multispace1, TrackEvent::parse))),
-            )),
-            |(name, events)| Track::new(name, events),
+            preceded(
+                spaced(tag("[Events]")),
+                curlied(many1(spaced(GlobalEvent::parse))),
+            ),
+            Self::new,
         )(input)
     }
 }
 
-impl<'a> Display for Track<'a> {
+impl<'a> Display for Events<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "[{}]\n{{\n{}}}\n",
-            self.name,
+            "[Events]\n{{\n{}}}\n",
             self.events
                 .iter()
-                .map(TrackEvent::to_string)
+                .map(GlobalEvent::to_string)
                 .collect::<String>()
         )
     }
@@ -73,7 +65,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_track() {
-        Track::parse(include_str!("test_data/test_track.txt")).unwrap();
+    fn test_global_events() {
+        Events::parse(include_str!("test_data/test_events.txt")).unwrap();
     }
 }

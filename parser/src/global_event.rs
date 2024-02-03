@@ -4,12 +4,9 @@ use nom::{
     branch::alt,
     bytes::complete::{tag, take_until},
     combinator::{cut, map},
-    multi::many1,
     sequence::{delimited, preceded},
     IResult,
 };
-
-use crate::components::{curlied, spaced};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum GlobalEvent<'a> {
@@ -32,7 +29,7 @@ impl<'a> GlobalEvent<'a> {
     }
 
     #[inline]
-    fn parse(input: &str) -> IResult<&str, GlobalEvent> {
+    pub(crate) fn parse(input: &str) -> IResult<&str, GlobalEvent> {
         let (input, time) = nom::character::complete::u32(input)?;
         let (input, _) = tag(" = E ")(input)?;
         let (input, result) = delimited(
@@ -53,12 +50,24 @@ impl<'a> GlobalEvent<'a> {
         Ok((input, result))
     }
 
-    #[inline]
-    pub(crate) fn parse_section(input: &str) -> IResult<&str, Vec<GlobalEvent>> {
-        preceded(
-            spaced(tag("[Events]")),
-            curlied(many1(spaced(GlobalEvent::parse))),
-        )(input)
+    pub(crate) fn time(&self) -> u32 {
+        match self {
+            GlobalEvent::PhraseStart { time }
+            | GlobalEvent::PhraseEnd { time }
+            | GlobalEvent::Section { time, .. }
+            | GlobalEvent::Lyric { time, .. }
+            | GlobalEvent::Other { time, .. } => *time,
+        }
+    }
+
+    pub(crate) fn time_mut(&mut self) -> &mut u32 {
+        match self {
+            GlobalEvent::PhraseStart { time }
+            | GlobalEvent::PhraseEnd { time }
+            | GlobalEvent::Section { time, .. }
+            | GlobalEvent::Lyric { time, .. }
+            | GlobalEvent::Other { time, .. } => time,
+        }
     }
 }
 
@@ -85,10 +94,5 @@ mod tests {
         GlobalEvent::parse("38496 = E \"phrase_start\"").unwrap();
         GlobalEvent::parse("38592 = E \"lyric I\"").unwrap();
         GlobalEvent::parse("40512 = E \"phrase_end\"").unwrap();
-    }
-
-    #[test]
-    fn test_global_events() {
-        GlobalEvent::parse_section(include_str!("test_data/test_events.txt")).unwrap();
     }
 }

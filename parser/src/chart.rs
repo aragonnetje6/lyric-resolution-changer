@@ -8,13 +8,13 @@ use nom::{
     IResult,
 };
 
-use crate::{global_event::GlobalEvent, song::Song, sync_track::SyncTrack, track::Track};
+use crate::{events::Events, song::Song, sync_track::SyncTrack, track::Track};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Chart<'a> {
     song: Song<'a>,
     synctrack: SyncTrack,
-    global_events: Vec<GlobalEvent<'a>>,
+    global_events: Events<'a>,
     tracks: Vec<Track<'a>>,
 }
 
@@ -23,7 +23,7 @@ impl<'a> Chart<'a> {
     pub(crate) fn new(
         song: Song<'a>,
         synctrack: SyncTrack,
-        global_events: Vec<GlobalEvent<'a>>,
+        global_events: Events<'a>,
         tracks: Vec<Track<'a>>,
     ) -> Self {
         Self {
@@ -34,13 +34,11 @@ impl<'a> Chart<'a> {
         }
     }
 
-    /// Multiply all timestamps and durations by the given factor.
+    /// Multiply all timestamps and durations by the given factor. If two events have a 1-tick difference, this difference is preserved.
     pub fn multiply(&mut self, factor: u32) {
         self.song.multiply(factor);
         self.synctrack.multiply(factor);
-        for item in &mut self.global_events {
-            item.multiply(factor);
-        }
+        self.global_events.multiply(factor);
         for item in &mut self.tracks {
             item.multiply(factor);
         }
@@ -58,7 +56,7 @@ impl<'a> Chart<'a> {
         let (input, _) = multispace0(input)?;
         let (input, synctrack) = SyncTrack::parse(input)?;
         let (input, _) = multispace0(input)?;
-        let (input, global_events) = GlobalEvent::parse_section(input)?;
+        let (input, global_events) = Events::parse(input)?;
         let (input, _) = multispace0(input)?;
         let (input, tracks) = separated_list1(multispace1, Track::parse)(input)?;
         let (input, _) = all_consuming(multispace0)(input)?;
@@ -70,22 +68,10 @@ impl<'a> Display for Chart<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "[Song]
-{{
-{}}}
-[SyncTrack]
-{{
-{}}}
-[Events]
-{{
-{}}}
-{}",
+            "{}\n{}\n{}\n{}",
             self.song,
             self.synctrack,
-            self.global_events
-                .iter()
-                .map(GlobalEvent::to_string)
-                .collect::<String>(),
+            self.global_events,
             self.tracks.iter().map(Track::to_string).collect::<String>()
         )
     }

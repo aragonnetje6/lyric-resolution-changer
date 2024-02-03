@@ -63,7 +63,7 @@ impl<'a> Display for Song<'a> {
         let resolution_string = self.resolution.to_string();
         write!(
             f,
-            "{}{}",
+            "[Song]\n{{\n{}{}}}",
             SongProperty::new("Resolution", &resolution_string),
             self.properties
                 .iter()

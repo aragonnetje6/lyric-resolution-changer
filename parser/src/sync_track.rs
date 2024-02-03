@@ -39,7 +39,7 @@ impl Display for SyncTrack {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "{}",
+            "[SyncTrack]\n{{\n{}}}",
             self.events
                 .iter()
                 .map(SyncTrackEvent::to_string)
