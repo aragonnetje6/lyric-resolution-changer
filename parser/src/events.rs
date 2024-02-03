@@ -21,15 +21,17 @@ impl<'a> Events<'a> {
     pub(crate) fn multiply(&mut self, factor: u32) {
         if let Some((head, tail)) = self.events.split_first_mut() {
             let mut prev_time = head.time();
+            let mut prev_time_final = prev_time * factor;
             head.multiply(factor);
             for item in tail {
                 let time = item.time();
                 if time == prev_time + 1 {
-                    *item.time_mut() = prev_time * factor + 1;
+                    *item.time_mut() = prev_time_final + 1;
                 } else {
                     item.multiply(factor);
                 }
                 prev_time = time;
+                prev_time_final = item.time();
             }
         }
     }
