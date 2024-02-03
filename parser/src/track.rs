@@ -26,18 +26,8 @@ impl<'a> Track<'a> {
     }
 
     pub(crate) fn multiply(&mut self, factor: u32) {
-        if let Some((head, tail)) = self.events.split_first_mut() {
-            let mut prev_time = head.time();
-            head.multiply(factor);
-            for item in tail {
-                let time = item.time();
-                if time == prev_time + 1 {
-                    *item.time_mut() = prev_time * factor + 1;
-                } else {
-                    item.multiply(factor);
-                }
-                prev_time = time;
-            }
+        for item in &mut self.events {
+            item.multiply(factor);
         }
     }
 
