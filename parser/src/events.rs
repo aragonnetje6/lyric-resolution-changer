@@ -25,7 +25,9 @@ impl<'a> Events<'a> {
             head.multiply(factor);
             for item in tail {
                 let time = item.time();
-                if time == prev_time + 1 {
+                if time == prev_time {
+                    *item.time_mut() = prev_time_final;
+                } else if time == prev_time + 1 {
                     *item.time_mut() = prev_time_final + 1;
                 } else {
                     item.multiply(factor);

@@ -2,5 +2,9 @@
 members = [
   "parser",
   "cli",
+  "webpage",
 ]
 resolver = "2"
+
+[workspace.dependencies]
+chart-file-parser = { version = "0.4.1", path = "parser" }
