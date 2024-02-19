@@ -2,14 +2,12 @@ use std::fmt::Display;
 
 use nom::{
     branch::alt,
-    bytes::complete::{tag, take_until1},
-    character::complete::{alpha1, multispace1},
+    bytes::complete::tag,
+    character::complete::{multispace1, not_line_ending},
     combinator::map,
     sequence::{preceded, separated_pair},
     IResult,
 };
-
-use crate::components::squared;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum TrackEvent<'a> {
@@ -53,10 +51,9 @@ impl<'a> TrackEvent<'a> {
                     sustain,
                 },
             ),
-            map(
-                preceded(tag("E "), alt((squared(take_until1("]")), alpha1))),
-                |value| TrackEvent::Event { time, value },
-            ),
+            map(preceded(tag("E "), not_line_ending), |value| {
+                TrackEvent::Event { time, value }
+            }),
             map(
                 preceded(
                     tag("S "),
