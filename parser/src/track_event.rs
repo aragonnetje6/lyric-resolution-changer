@@ -23,7 +23,11 @@ impl<'a> TrackEvent<'a> {
                 *time *= factor;
                 *sustain *= factor;
             }
-            TrackEvent::Special { time, .. } | TrackEvent::Event { time, .. } => *time *= factor,
+            TrackEvent::Special { time, content, .. } => {
+                *time *= factor;
+                *content *= factor;
+            }
+            TrackEvent::Event { time, .. } => *time *= factor,
         }
     }
 
